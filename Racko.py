@@ -52,13 +52,25 @@ def check_racko(racko):
         return False
 
 def computer_play(hand):
-    print 'To be written'
-
+    if (discard[-1]>50) and (discard[-1]>hand[-1]):
+        hand.pop(-1)
+        hand.append(discard[-1])
+    elif (discard[-1]>40) and (discard[-1]>hand[-2]):
+        hand.pop(-2)
+        hand.insert(-2,discard[-1])
+    elif (discard[-1]>30) and (discard[-1]>hand[-3]):
+        hand.pop(-3)
+        hand.insert(-3,discard[-1])
+    elif (discard[-1]>20) and (discard[-1]>hand[-4]):
+        hand.pop(-4)
+        hand.insert(-4,discard[-1])
+    print hand
+    
 def find_and_replace(new_Card, cardToBeReplaced, hand):
     '''FInd the card to be replaced in the hand and replace it with new card'''
     print '''Did you mean this card? ''', cardToBeReplaced
     confirm=raw_input('Please input \'Y\' if it is right, \'N\' if it is not. ')
-     
+
 
     while (confirm in 'Nn' ) or (not (int(cardToBeReplaced) in hand)):
         cardToBeReplaced=raw_input('You received this message because either you entered \'N\' or the card is not even in your hand.\n Which card do you wish to kick out this time?  ')
@@ -73,15 +85,6 @@ def find_and_replace(new_Card, cardToBeReplaced, hand):
     discard.append(int(cardToBeReplaced))
     #print the user's hand
     print_top_to_bottom(hand)
-    
-    # =========for testing purpose=========
-    print discard
-
-    #=================================
-    
-    
-    
-
 
 
 def main():
@@ -91,6 +94,8 @@ def main():
     deck=range(1,61)
     discard=[]
 
+    initial_round=True
+    
     #shuffle the deck of card
     shuffle()
     
@@ -103,12 +108,16 @@ def main():
     print user_hand
     #=================================
 
-
     #choose who goes first
     userStarts=does_user_begin()
     if userStarts==True:
-        #Print from top to bottom
-        print_top_to_bottom(user_hand)
+        print '''User starts first!\n'''
+        who_starts_first='User'
+    else:
+        print '''Computer starts first!\n'''
+        who_starts_first='Computer'
+
+    print_top_to_bottom(user_hand)
         
     #=========for testing purpose=========
     #reveal one card to begin the discard pile
@@ -118,13 +127,13 @@ def main():
 
         
     #while neither the computer nor the user has racko
-    check1=check_racko(computer_hand)
-    check2=check_racko(user_hand)
+    computer_racko=check_racko(computer_hand)
+    user_racko=check_racko(user_hand)
 
-    while (not check1) and (not check2):
-        computer_hand=computer_play(computer_hand)
+    while (not computer_racko) and (not user_racko):
+        if (who_starts_first=='Computer') and initial_round:
+            computer_hand=computer_play(computer_hand)
 
-        
         #ask the user if they want this card
         #print the user's hand
         print
@@ -149,9 +158,10 @@ def main():
                 discard.append(card)
                 print_top_to_bottom(user_hand)
         
-                
-            
-                
+        computer_hand=computer_play(computer_hand)
+
+        #change the flag           
+        initial_round=False               
         #check and make sure there are still some cards in the deck
         if len(deck)==0:
             shuffle()
