@@ -1,11 +1,17 @@
+#authors - Yike Chen and Xiaozhuo Cheng
 import random
 
 def shuffle():
     '''shuffle the card'''
-    random.shuffle(deck)        
-    # =========for testing purpose=========
-    print deck
-    #=================================
+    global deck
+    global discard
+    if len(deck)==60:
+        random.shuffle(deck)
+    if len(deck)==0:
+        random.shuffle(discard)
+        deck=discard
+        discard=[]
+        discard.append(deal_card())
 
 def deal_initial_hands():
     '''Start the game by dealing two hands of 10 cards each'''
@@ -13,8 +19,8 @@ def deal_initial_hands():
     computer=[]
     user=[]
     while i<10:
-        computer.append(deck.pop(0))
-        user.append(deck.pop(0))
+        computer.append(deck.pop(-1))
+        user.append(deck.pop(-1))
         i+=1
     return (computer, user)
     
@@ -33,13 +39,13 @@ def print_top_to_bottom(rack):
 
 def deal_card():
     '''Get the top card from the deck'''
-    return deck.pop(0)
+    return deck.pop(-1)
 
 def check_racko(racko):
     '''Determine if racko has been reached'''
     n=0
     for i in range(1,10):
-        if racko[i-1]<racko[i]:
+        if racko[i-1]>racko[i]:
             n=n+1
     if n==9:
         print 'Racko!'
@@ -51,67 +57,61 @@ def computer_play(hand):
     x=0
     j=0
     print '''Now is computer's turn!'''
-    #=========for testing purpose=========
-    print hand
-    #=================================
-    for i in range(0,10):
-        if  (x==0) and (  (j<discard[-1]<=j+6) and (hand[i] not in range(j+1,j+7)) ) or ( (j<discard[-1]<=j+6) and (hand[i]>discard[-1] )    ):
+    print '''> > > > > > >  P L E A S E    W A I T  < < < < < < < '''
+    # divide 1~60 into 10 sections, compare each card with each section, if the discard card is more suitable, then change into discard card
+    for i in range(9,-1,-1):
+        if (x==0)and( (  (j<discard[-1]<=j+6) and (hand[i] not in range(j+1,j+7)) ) or ( (j<discard[-1]<=j+6) and (hand[i]>discard[-1] ))    ):
             x=hand.pop(i)
             hand.insert(i,discard[-1])
             discard.pop(-1)
             discard.append(x)
         j+=6
     j=0
+    # if this does not work, then try card from deck pile
     if x==0:
-        for k in range(0,10):
-            if (x==0) and (  (j<deck[0]<=j+6) and (hand[k] not in range(j+1,j+7) ) )or ( (j<deck[0]<=j+6) and (hand[k]>deck[0] )    ):
+        for k in range(9,-1,-1):
+            if (x==0) and ((  (j<deck[-1]<=j+6) and (hand[k] not in range(j+1,j+7) ) )or ( (j<deck[-1]<=j+6) and (hand[k]>deck[-1] ))    ):
                 x=hand.pop(k)
-                hand.insert(k,deck[0])
-                deck.pop(0)
+                hand.insert(k,deck[-1])
+                deck.pop(-1)
                 discard.append(x)           
             j+=6
     if x==0:
-        x=deck.pop(0)
+        x=deck.pop(-1)
         discard.append(x)
-    #=========for testing purpose=========
-    print hand
-    #=================================
     return hand
-    
-def find_and_replace(new_Card, cardToBeReplaced, hand):
-    '''FInd the card to be replaced in the hand and replace it with new card'''
-    print '''Did you mean this card? ''', cardToBeReplaced
-    confirm=raw_input('Please input \'Y\' if it is right, \'N\' if it is not. ')
 
-    while (confirm in 'Nn' ) or (not (int(cardToBeReplaced) in hand)):
-        cardToBeReplaced=raw_input('You received this message because either you entered \'N\' or the card is not even in your hand.\n Which card do you wish to kick out this time?  ')
-        print '''Did you mean this card? ''', cardToBeReplaced
-        confirm=raw_input('Please input \'Y\' if it is right, \'N\' if it is not. ')
+def find_and_replace(newCard, cardToBeReplaced, hand):
+    '''FInd the card to be replaced in the hand and replace it with new card'''
+
+    while (not (int(cardToBeReplaced) in hand)):
+        cardToBeReplaced=raw_input('You received this message because the card is not even in your hand.\n Which card do you wish to kick out this time?  ')
     
     #modify the user's hand and the discard pile
     index=hand.index(int(cardToBeReplaced))
     hand.pop(index)
-    discard.pop(-1)    
-    hand.insert(index,new_Card)
+    hand.insert(index,newCard)
     discard.append(int(cardToBeReplaced))
     #print the user's hand
     print_top_to_bottom(hand)
+
+def add_card_to_discard(card):
+    discard.append(card)
 
 def main():
     global deck
     global discard
     deck=range(1,61)
     discard=[]
+    #Set a flag to indicate whether it is the first round or not
     initial_round=True 
     #shuffle the deck of card
-    shuffle()   
+    shuffle()
+
     #deal a card to the computer and a card to the user
     #repeat unitl both have 10 cards
     (computer_hand,user_hand)=deal_initial_hands()
-    #=========for testing purpose=========
-    print computer_hand
-    print user_hand
-    #=================================
+
     #choose who goes first
     userStarts=does_user_begin()
     if userStarts==True:
@@ -122,20 +122,16 @@ def main():
         who_starts_first='Computer'
     print '''Deal initial hands complete: '''
     print_top_to_bottom(user_hand)
-    discard.append(deal_card())
-    
-    #=========for testing purpose=========
-    #reveal one card to begin the discard pile
-    #print '''discard card:''', discard[-1]
-    #=================================       
+    add_card_to_discard(deal_card())
+          
     #while neither the computer nor the user has racko
     while (not (check_racko(computer_hand))) and (not (check_racko(user_hand))):
         if (who_starts_first=='Computer') and initial_round:
             computer_hand=computer_play(computer_hand)
-
         #ask the user if they want this card
         #print the user's hand
         print
+        print 'Now it is your turn! '
         print_top_to_bottom(user_hand)
         print 'discard card:', discard[-1]
         choice=raw_input('Do you want this card? Input \'Y\' if you do, \'N\' if you do not.')
@@ -143,9 +139,11 @@ def main():
             #ask the user for the number of the card they want to kick out
             unwanted=raw_input('From top to bottom, which card do you wish to kick out? ')
             #find the card and replace it, update the discard pile, then print the user's hand
-            find_and_replace(discard[-1],unwanted,user_hand)
+            replace=discard.pop(-1)
+            find_and_replace(replace,unwanted,user_hand)
+            
         elif choice in 'Nn':
-            card=deck.pop(0)
+            card=deck.pop(-1)
             print 'The card you get from the deck is ', card
             #ask the user if he wants to use it
             choice2=raw_input('Do you want to keep it? ')
@@ -154,25 +152,29 @@ def main():
                 unwanted2=raw_input('From top to bottom, which card do you wish to kick out? ')
                 find_and_replace(card,unwanted2,user_hand)
             else:
-                discard.append(card)
-                print_top_to_bottom(user_hand)        
+                add_card_to_discard(card)
+                print_top_to_bottom(user_hand)
+        #check if user reaches racko
+        if (check_racko(user_hand)):
+            print '''========= Congrats, you win! ============'''
+            break
+        #when the user has no card from the deck, there is no need for computer to proceed
+        shuffle()
         computer_hand=computer_play(computer_hand)
-        #change the flag           
+        #check if computer reaches racko
+        if (check_racko(computer_hand)):
+            print '''========= Sucker, you lose! ==========='''
+            break
+        
+        #change the flag to indicate it is no longer first round          
         initial_round=False               
         #check and make sure there are still some cards in the deck
-        if len(deck)==0:
-            deck=discard
-            shuffle()
-            discard=[]
-            discard.append(deal_card())           
-        if (check_racko(computer_hand)):
-            print '''========Sucker, you lose!=========='''
-            break
-        if (check_racko(user_hand)):
-            print '''========Congrats, you win!==========='''
-            break
+        shuffle()
+
+
+        
     #Restart the game
-    print '\n'*40
+    print '\n'*33
     main()
 
 if __name__=='__main__':
