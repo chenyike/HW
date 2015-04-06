@@ -331,8 +331,13 @@ def get_bacon(actor,movieDb):
         return 'Due to the limitation of our database, we are unable to tell you the bacon number' 
 
 def main():
+
+    
     actor_DB = create_actors_DB('movies.txt')
     ratings_DB = create_ratings_DB('moviescores.csv')
+    print get_common_actors('Superman','speed',actor_DB)
+    print select_where_actor_is(' ', actor_DB)
+    print actor_DB['Michael Emerson']
 
     #copy the original database for future use
     actor_list = actor_DB.copy()

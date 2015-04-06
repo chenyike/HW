@@ -1,4 +1,4 @@
-#author - Jian Li & Yike Chen
+#author - Yike Chen
 import string
 
 def isLetterLower(letter):

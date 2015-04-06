@@ -21,7 +21,7 @@ class TestMovies(unittest.TestCase):
     def testreal_actor_name(self):
         # input an actor's name in low case, should return real name in Database
         actor = real_actor_name('will smith',self.movieDb.keys())
-        self.assertEqual(actor, 'Will Smith', ' check real actor name')
+        self.assertEquals(actor, 'Will Smith', ' check real actor name')
 
         
     def testreal_movie_name(self):
@@ -149,8 +149,8 @@ class TestMovies(unittest.TestCase):
     
     def testget_common_actors(self):
         # test if shared actors can be found given two movie names
-        actorlist=get_common_actors('The Godfather','The Godfather Part II',self.movieDb)
-        self.assertEqual(actorlist,['Al Pacino', 'Marlon Brando', 'Diane Keaton'], 'Critic functionality testing failed. ')
+        actorlist=get_common_actors('Superman','speed',self.movieDb)
+        self.assertEqual(actorlist,[], 'Critic functionality testing failed. ')
         # test if movie is not in database, should return an empty list
         actorlist=get_common_actors('Godfather','Godfather Part II',self.movieDb)
         self.assertEqual(actorlist,[], 'Check movies not in database. ')

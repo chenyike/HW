@@ -1,4 +1,4 @@
-#author - Jian Li & Yike Chen
+#author - Yike Chen
 
 import unittest
 from makeWebsite import *
